@@ -1,0 +1,107 @@
+# Deploys Scrum Poker to an Azure App Service.
+#
+# Prerequisites in your AzDO org:
+#   - An Azure Resource Manager service connection with rights to the target App Service.
+#   - The App Service itself (Linux, .NET 8 runtime stack recommended).
+#
+# The target is chosen at queue time via the runtime parameters below.
+
+parameters:
+  - name: azureServiceConnection
+    displayName: Azure service connection (ARM)
+    type: string
+  - name: appServiceName
+    displayName: App Service name to deploy to
+    type: string
+  - name: appServiceType
+    displayName: App Service OS
+    type: string
+    default: webAppLinux
+    values:
+      - webAppLinux
+      - webApp
+  - name: environmentName
+    displayName: AzDO environment to record deployments against
+    type: string
+    default: scrumpoker
+
+trigger:
+  branches:
+    include:
+      - master
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: Build
+    jobs:
+      - job: Build
+        steps:
+          - task: NodeTool@0
+            displayName: Use Node 20
+            inputs:
+              versionSpec: 20.x
+
+          # The client build lands in the server's wwwroot, so it must run before publish.
+          - script: |
+              npm ci
+              npm run build
+            displayName: Build React client
+            workingDirectory: client
+
+          - task: UseDotNet@2
+            displayName: Use .NET 8 SDK
+            inputs:
+              packageType: sdk
+              version: 8.0.x
+
+          - script: >
+              dotnet publish src/Pixelbadger.ScrumPoker.Web
+              -c Release
+              -o $(Build.ArtifactStagingDirectory)/publish
+            displayName: Publish server
+
+          - task: ArchiveFiles@2
+            displayName: Package deployment zip
+            inputs:
+              rootFolderOrFile: $(Build.ArtifactStagingDirectory)/publish
+              includeRootFolder: false
+              archiveType: zip
+              archiveFile: $(Build.ArtifactStagingDirectory)/app.zip
+
+          - publish: $(Build.ArtifactStagingDirectory)/app.zip
+            artifact: app
+
+  - stage: Deploy
+    dependsOn: Build
+    jobs:
+      - deployment: Deploy
+        environment: ${{ parameters.environmentName }}
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                # WebSockets keeps SignalR off the long-polling fallback; the SQLite path
+                # points at /home so round history survives restarts and redeploys.
+                - task: AzureAppServiceSettings@1
+                  displayName: Configure App Service settings
+                  inputs:
+                    azureSubscription: ${{ parameters.azureServiceConnection }}
+                    appName: ${{ parameters.appServiceName }}
+                    generalSettings: |
+                      [
+                        { "name": "webSocketsEnabled", "value": "true" }
+                      ]
+                    appSettings: |
+                      [
+                        { "name": "Database__Path", "value": "/home/scrumpoker.db", "slotSetting": false }
+                      ]
+
+                - task: AzureWebApp@1
+                  displayName: Deploy to App Service
+                  inputs:
+                    azureSubscription: ${{ parameters.azureServiceConnection }}
+                    appType: ${{ parameters.appServiceType }}
+                    appName: ${{ parameters.appServiceName }}
+                    package: $(Pipeline.Workspace)/app/app.zip
