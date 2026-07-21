@@ -1,0 +1,238 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f5f6fa;
+  --panel: #ffffff;
+  --text: #1d2330;
+  --muted: #6b7280;
+  --accent: #4f6df5;
+  --accent-text: #ffffff;
+  --border: #d9dce3;
+  --card-bg: #ffffff;
+  --success: #16a34a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14161d;
+    --panel: #1e222d;
+    --text: #e7e9ee;
+    --muted: #9aa1af;
+    --accent: #6d86ff;
+    --border: #333a49;
+    --card-bg: #262b38;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+}
+
+.page-center {
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 420px;
+}
+
+h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+h2 {
+  font-size: 1rem;
+  margin: 1.5rem 0 0.75rem;
+}
+
+.muted {
+  color: var(--muted);
+  margin: 0.25rem 0 1rem;
+}
+
+.error {
+  color: #dc2626;
+}
+
+label {
+  display: block;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+input {
+  display: block;
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+}
+
+input:focus {
+  outline: 2px solid var(--accent);
+  border-color: transparent;
+}
+
+button {
+  font: inherit;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  background: var(--accent);
+  color: var(--accent-text);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+button.secondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.participants {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.participants li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.55rem 0.9rem;
+}
+
+.participants li.offline {
+  opacity: 0.55;
+}
+
+.participant-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--accent);
+  color: var(--accent-text);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+}
+
+.offline-badge {
+  background: var(--muted);
+}
+
+.vote-slot {
+  min-width: 2.2rem;
+  text-align: center;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.vote-slot.voted {
+  color: var(--success);
+}
+
+.results {
+  margin-top: 1rem;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+.results p {
+  margin: 0;
+}
+
+.owner-controls {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.deck-section h2 {
+  margin-top: 2rem;
+}
+
+.deck {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.card {
+  width: 3.4rem;
+  height: 4.6rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  background: var(--card-bg);
+  color: var(--text);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease, border-color 0.1s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent);
+}
+
+.card.selected {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+  transform: translateY(-3px);
+}
